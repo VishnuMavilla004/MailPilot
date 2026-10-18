@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Inbox - MailPilot{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <h1>Inbox</h1>
+    <div class="actions">
+      <form method="post" action="{% url 'sync' %}">
+        {% csrf_token %}
+        <button class="btn quiet" type="submit">Sync from Gmail</button>
+      </form>
+      <form method="post" action="{% url 'classify' %}">
+        {% csrf_token %}
+        <button class="btn" type="submit">Classify new emails</button>
+      </form>
+    </div>
+  </div>
+
+  <ul class="mail-list">
+    {% for e in emails %}
+      <li>
+        <a class="mail" data-cat="{{ e.category }}" href="{% url 'email_detail' e.pk %}">
+          <span class="from">{{ e.sender }}</span>
+          <span class="when">{{ e.received_at|date:"d M, H:i" }}</span>
+          <span class="subject">{{ e.subject|default:"(no subject)" }}</span>
+          <span class="snippet">{{ e.body|truncatechars:110 }}</span>
+          <span class="meta">
+            <span class="chip" data-cat="{{ e.category }}">{{ e.get_category_display|default:"Not classified" }}</span>
+            {% if e.confidence != None %}<span class="conf">{{ e.confidence|floatformat:2 }}</span>{% endif %}
+          </span>
+        </a>
+      </li>
+    {% empty %}
+      <li class="empty">No emails yet. Choose <strong>Sync from Gmail</strong> to pull in your latest messages.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

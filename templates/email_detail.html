@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ email.subject|default:"Email" }} - MailPilot{% endblock %}
+{% block content %}
+  <a class="back" href="{% url 'inbox' %}">Back to inbox</a>
+  <div class="detail">
+    <article>
+      <h1>{{ email.subject|default:"(no subject)" }}</h1>
+      <p class="msg-meta">
+        From {{ email.sender }}<br>
+        {{ email.received_at|date:"d M Y, H:i" }}<br>
+        <span class="chip" data-cat="{{ email.category }}">{{ email.get_category_display|default:"Not classified" }}</span>
+        {% if email.confidence != None %}<span class="conf">{{ email.confidence|floatformat:2 }} confidence</span>{% endif %}
+      </p>
+      <div class="body">{{ email.body }}</div>
+    </article>
+
+    <div class="panel">
+      <section>
+        <h2>Reply</h2>
+        <form method="post" action="{% url 'make_draft' email.pk %}">
+          {% csrf_token %}
+          <button class="btn" type="submit">Write a draft reply</button>
+        </form>
+
+        {% for d in drafts %}
+          <form class="draft" method="post" action="{% url 'draft_action' d.pk %}">
+            {% csrf_token %}
+            <p class="tag">Draft: {{ d.get_status_display }}</p>
+            <textarea name="content" rows="10" {% if d.status != 'pending' %}readonly{% endif %}>{{ d.content }}</textarea>
+            {% if d.status == 'pending' %}
+              <div class="btns">
+                <button class="btn" type="submit" name="action" value="send"
+                        onclick="return confirm('Send this reply now?')">Send reply</button>
+                <button class="btn quiet" type="submit" name="action" value="save">Save edits</button>
+                <button class="btn danger" type="submit" name="action" value="discard">Discard</button>
+              </div>
+            {% endif %}
+          </form>
+        {% endfor %}
+      </section>
+
+      <section>
+        <h2>Schedule a meeting</h2>
+        <form method="post" action="{% url 'meeting_extract' email.pk %}">
+          {% csrf_token %}
+          <button class="btn quiet" type="submit">Fill in details from this email</button>
+        </form>
+
+        <form method="post" action="{% url 'meeting_create' email.pk %}">
+          {% csrf_token %}
+          <label class="field" for="title">Title</label>
+          <input id="title" type="text" name="title" value="{{ default_title }}">
+          <div class="row2">
+            <div>
+              <label class="field" for="start">Start</label>
+              <input id="start" type="datetime-local" name="start" value="{{ default_start }}" required>
+            </div>
+            <div>
+              <label class="field" for="end">End</label>
+              <input id="end" type="datetime-local" name="end" value="{{ default_end }}" required>
+            </div>
+          </div>
+          <label class="field" for="attendees">Attendees (comma-separated, optional)</label>
+          <input id="attendees" type="text" name="attendees" value="{{ default_attendees }}">
+          <label class="check"><input type="checkbox" name="force" value="1"> Create even if I am busy</label>
+          <div class="btns">
+            <button class="btn quiet" type="submit" name="action" value="check">Check conflicts</button>
+            <button class="btn" type="submit" name="action" value="create"
+                    onclick="return confirm('Create this event? Attendees will get an invitation.')">Create event</button>
+          </div>
+        </form>
+
+        {% if meetings %}
+          <h3 style="margin-top:20px">Meetings from this email</h3>
+          <ul class="plain">
+            {% for m in meetings %}
+              <li>{{ m.title }}, {{ m.start_time|date:"d M Y, H:i" }} ({{ m.get_status_display }})</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+{% endblock %}

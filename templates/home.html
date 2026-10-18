@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}MailPilot{% endblock %}
+{% block content %}
+  {% if user.is_authenticated %}
+    <div class="hero">
+      <h1>Welcome back</h1>
+      <p class="lead">You are signed in as {{ user.email }}.</p>
+      <div class="btns">
+        <a class="btn" href="{% url 'inbox' %}">Open inbox</a>
+        <a class="btn quiet" href="{% url 'dashboard' %}">View dashboard</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="hero">
+      <h1>Triage your email in minutes</h1>
+      <p class="lead">MailPilot reads your Gmail, sorts every message, drafts replies for you to approve, and turns meeting requests into calendar events.</p>
+      <div class="btns">
+        <a class="btn" href="{% url 'google_login' %}">Sign in with Google</a>
+      </div>
+    </div>
+    <div class="sample" aria-hidden="true">
+      <p class="note">An example of a sorted inbox</p>
+      <ul class="mail-list">
+        <li><div class="mail" data-cat="urgent">
+          <span class="from">Recruiter, Northwind Tech</span><span class="when">09:12</span>
+          <span class="subject">Interview slot confirmation needed today</span>
+          <span class="meta"><span class="chip" data-cat="urgent">Urgent</span></span></div></li>
+        <li><div class="mail" data-cat="meeting">
+          <span class="from">Priya, Project team</span><span class="when">08:40</span>
+          <span class="subject">Can we sync on Thursday at 3 pm?</span>
+          <span class="meta"><span class="chip" data-cat="meeting">Meeting</span></span></div></li>
+        <li><div class="mail" data-cat="newsletter">
+          <span class="from">Weekly Python Digest</span><span class="when">Yesterday</span>
+          <span class="subject">This week in Python</span>
+          <span class="meta"><span class="chip" data-cat="newsletter">Newsletter</span></span></div></li>
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

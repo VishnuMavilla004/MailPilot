@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - MailPilot{% endblock %}
+{% block content %}
+  <h1>Dashboard</h1>
+
+  <div class="facts">
+    <div><strong>{{ total }}</strong><span>emails synced</span></div>
+    <div><strong>{{ unclassified }}</strong><span>waiting to be classified</span></div>
+    <div><strong>{{ calls_today }}</strong><span>AI calls today ({{ tokens_today }} tokens)</span></div>
+  </div>
+
+  <h2>How your inbox is sorted</h2>
+  {% if by_category %}
+    <div class="bar" role="img" aria-label="Share of emails in each category">
+      {% for row in by_category %}
+        <span data-cat="{{ row.category }}" style="width: {% widthratio row.n total 100 %}%"></span>
+      {% endfor %}
+    </div>
+    <ul class="legend">
+      {% for row in by_category %}
+        <li><span class="chip" data-cat="{{ row.category }}">{{ row.category }}</span><span>{{ row.n }}</span></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="note">Nothing is classified yet. Open the inbox and choose <strong>Classify new emails</strong>.</p>
+  {% endif %}
+
+  <div class="two">
+    <div>
+      <h2>Drafts waiting for your review</h2>
+      <ul class="plain">
+        {% for d in pending_drafts %}
+          <li><a href="{% url 'email_detail' d.email.pk %}">{{ d.email.subject|default:"(no subject)" }}</a></li>
+        {% empty %}
+          <li class="note">No drafts waiting.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h2>Upcoming meetings</h2>
+      <ul class="plain">
+        {% for m in upcoming %}
+          <li>{{ m.title }}<br><span class="note">{{ m.start_time|date:"d M Y, H:i" }}</span></li>
+        {% empty %}
+          <li class="note">No meetings created yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}
