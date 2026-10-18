@@ -1,5 +1,4 @@
 # MailPilot
-# MailPilot
 
 AI-powered email assistant built with Django and MySQL. It connects to Gmail,
 classifies emails with an LLM, drafts replies for human approval, and turns
